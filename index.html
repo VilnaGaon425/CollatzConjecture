@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Collatz Conjecture</title>
+<style>
+    body {
+        margin: 0;
+        background: black;
+        color: white;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+    }
+
+    #intro {
+        position: absolute;
+        top: 40%;
+        width: 100%;
+        text-align: center;
+        font-size: 32px;
+        letter-spacing: 2px;
+    }
+
+    #main {
+        display: none;
+        background: #f4f4f4;
+        color: black;
+        padding: 20px;
+        height: 100vh;
+        overflow-y: auto;
+    }
+
+    #container {
+        max-width: 600px;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    input {
+        width: 100%;
+        padding: 10px;
+        font-size: 18px;
+        margin-bottom: 15px;
+    }
+
+    #output {
+        font-size: 18px;
+        white-space: pre-wrap;
+        border-top: 1px solid #ddd;
+        padding-top: 15px;
+    }
+
+    .bigTitle {
+        font-size: 60px;
+        font-weight: bold;
+        margin-top: 20px;
+    }
+
+    .smallTitle {
+        font-size: 22px;
+        opacity: 0.8;
+    }
+</style>
+</head>
+<body>
+
+<div id="intro"></div>
+
+<div id="main">
+    <div id="container">
+        <h2>The Collatz Conjecture Calculator</h2>
+        <input id="numberInput" type="number" placeholder="Type a number and press Enter">
+        <div id="output"></div>
+    </div>
+</div>
+
+<script>
+// ---------------------- INTRO SEQUENCE ----------------------
+
+const intro = document.getElementById("intro");
+
+function typeText(text, speed = 70, callback) {
+    let i = 0;
+    intro.innerHTML = "";
+    const interval = setInterval(() => {
+        intro.innerHTML += text.charAt(i);
+        i++;
+        if (i >= text.length) {
+            clearInterval(interval);
+            if (callback) setTimeout(callback, 800);
+        }
+    }, speed);
+}
+
+function untypeText(speed = 40, callback) {
+    let text = intro.innerHTML;
+    let i = text.length;
+    const interval = setInterval(() => {
+        intro.innerHTML = text.substring(0, i);
+        i--;
+        if (i < 0) {
+            clearInterval(interval);
+            if (callback) setTimeout(callback, 500);
+        }
+    }, speed);
+}
+
+function startIntro() {
+    typeText("A Kohn Enterprises Production", 70, () => {
+        untypeText(40, () => {
+            intro.innerHTML = "<div class='smallTitle'>Kohn Enterprises Presents</div>";
+            setTimeout(() => {
+                intro.innerHTML += "<div class='bigTitle'>The Collatz Conjecture</div>";
+                setTimeout(() => {
+                    fadeToMain();
+                }, 2000);
+            }, 800);
+        });
+    });
+}
+
+function fadeToMain() {
+    let opacity = 1;
+    const fade = setInterval(() => {
+        opacity -= 0.02;
+        intro.style.opacity = opacity;
+        if (opacity <= 0) {
+            clearInterval(fade);
+            intro.style.display = "none";
+            document.body.style.background = "#f4f4f4";
+            document.getElementById("main").style.display = "block";
+        }
+    }, 30);
+}
+
+startIntro();
+
+// ---------------------- COLLATZ CALCULATOR ----------------------
+
+document.getElementById("numberInput").addEventListener("keypress", function(e) {
+    if (e.key === "Enter") {
+        const num = parseInt(this.value);
+        if (isNaN(num) || num <= 0) {
+            alert("Please enter a positive integer.");
+            return;
+        }
+        runCollatz(num);
+    }
+});
+
+function typeLine(text, callback) {
+    const output = document.getElementById("output");
+    let i = 0;
+    const interval = setInterval(() => {
+        output.innerHTML += text.charAt(i);
+        i++;
+        if (i >= text.length) {
+            clearInterval(interval);
+            output.innerHTML += "\n";
+            if (callback) callback();
+        }
+    }, 20);
+}
+
+function runCollatz(n) {
+    const output = document.getElementById("output");
+    output.innerHTML = "";
+
+    let current = n;
+
+    function nextStep() {
+        if (current === 1) {
+            typeLine("Reached 1. Collatz sequence complete!");
+            return;
+        }
+
+        let next;
+        if (current % 2 === 0) {
+            next = current / 2;
+            typeLine(`${current} is even → ${current} / 2 = ${next}`, () => {
+                current = next;
+                nextStep();
+            });
+        } else {
+            next = current * 3 + 1;
+            typeLine(`${current} is odd → ${current} × 3 + 1 = ${next}`, () => {
+                current = next;
+                nextStep();
+            });
+        }
+    }
+
+    typeLine(`Starting Collatz Conjecture for ${n}...\n`, nextStep);
+}
+</script>
+
+</body>
+</html>
